@@ -56,6 +56,17 @@
                 </div>
               </div>
             </div>
+            <div class="col-sm-4">
+                <div class="form-group">
+                    {!! Form::label('unit2_id', __('product.unit2') . ':*') !!}
+                    <div class="input-group">
+                        {!! Form::select('unit2_id', $units, $product->unit2_id, ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2', 'required']); !!}
+                        <span class="input-group-btn">
+                    <button type="button" @if(!auth()->user()->can('unit.create')) disabled @endif class="btn btn-default bg-white btn-flat quick_add_unit btn-modal" data-href="{{action('UnitController@create', ['quick_add' => true])}}" title="@lang('unit.add_unit')" data-container=".view_modal"><i class="fa fa-plus-circle text-primary fa-lg"></i></button>
+                  </span>
+                    </div>
+                </div>
+            </div>
 
             <div class="col-sm-4 @if(!session('business.enable_sub_units')) hide @endif">
               <div class="form-group">

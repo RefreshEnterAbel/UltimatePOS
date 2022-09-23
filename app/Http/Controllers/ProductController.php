@@ -111,6 +111,7 @@ class ProductController extends Controller
                 'c1.name as category',
                 'c2.name as sub_category',
                 'units.actual_name as unit',
+                'units.actual_name as unit2',
                 'brands.name as brand',
                 'tax_rates.name as tax',
                 'products.sku',
@@ -154,6 +155,11 @@ class ProductController extends Controller
             $unit_id = request()->get('unit_id', null);
             if (!empty($unit_id)) {
                 $products->where('products.unit_id', $unit_id);
+            }
+
+            $unit2_id = request()->get('unit2_id', null);
+            if (!empty($unit2_id)) {
+                $products->where('products.unit2_id', $unit2_id);
             }
 
             $tax_id = request()->get('tax_id', null);
@@ -296,6 +302,7 @@ class ProductController extends Controller
                 ->make(true);
         }
 
+
         $rack_enabled = (request()->session()->get('business.enable_racks') || request()->session()->get('business.enable_row') || request()->session()->get('business.enable_position'));
 
         $categories = Category::forDropdown($business_id, 'product');
@@ -403,6 +410,7 @@ class ProductController extends Controller
         //product screen view from module
         $pos_module_data = $this->moduleUtil->getModuleData('get_product_screen_top_view');
 
+
         return view('product.create')
             ->with(compact('categories', 'brands', 'units', 'taxes', 'barcode_types', 'default_profit_percent', 'tax_attributes', 'barcode_default', 'business_locations', 'duplicate_product', 'sub_categories', 'rack_details', 'selling_price_group_count', 'module_form_parts', 'product_types', 'common_settings', 'warranties', 'pos_module_data'));
     }
@@ -430,7 +438,7 @@ class ProductController extends Controller
 
         try {
             $business_id = $request->session()->get('user.business_id');
-            $form_fields = ['name', 'brand_id', 'unit_id', 'category_id', 'tax', 'type', 'barcode_type', 'sku', 'alert_quantity', 'tax_type', 'weight', 'product_custom_field1', 'product_custom_field2', 'product_custom_field3', 'product_custom_field4', 'product_description', 'sub_unit_ids'];
+            $form_fields = ['name', 'brand_id', 'unit_id','unit2_id', 'category_id', 'tax', 'type', 'barcode_type', 'sku', 'alert_quantity', 'tax_type', 'weight', 'product_custom_field1', 'product_custom_field2', 'product_custom_field3', 'product_custom_field4', 'product_description', 'sub_unit_ids'];
 
             $module_form_fields = $this->moduleUtil->getModuleFormField('product_form_fields');
             if (!empty($module_form_fields)) {
@@ -473,7 +481,6 @@ class ProductController extends Controller
             $product_details['warranty_id'] = !empty($request->input('warranty_id')) ? $request->input('warranty_id') : null;
 
             DB::beginTransaction();
-
             $product = Product::create($product_details);
 
             if (empty(trim($request->input('sku')))) {
@@ -655,7 +662,7 @@ class ProductController extends Controller
 
         try {
             $business_id = $request->session()->get('user.business_id');
-            $product_details = $request->only(['name', 'brand_id', 'unit_id', 'category_id', 'tax', 'barcode_type', 'sku', 'alert_quantity', 'tax_type', 'weight', 'product_custom_field1', 'product_custom_field2', 'product_custom_field3', 'product_custom_field4', 'product_description', 'sub_unit_ids']);
+            $product_details = $request->only(['name', 'brand_id', 'unit_id','unit2_id', 'category_id', 'tax', 'barcode_type', 'sku', 'alert_quantity', 'tax_type', 'weight', 'product_custom_field1', 'product_custom_field2', 'product_custom_field3', 'product_custom_field4', 'product_description', 'sub_unit_ids']);
 
             DB::beginTransaction();
             
@@ -674,6 +681,7 @@ class ProductController extends Controller
             $product->name = $product_details['name'];
             $product->brand_id = $product_details['brand_id'];
             $product->unit_id = $product_details['unit_id'];
+            $product->unit2_id = $product_details['unit2_id'];
             $product->category_id = $product_details['category_id'];
             $product->tax = $product_details['tax'];
             $product->barcode_type = $product_details['barcode_type'];
@@ -1538,6 +1546,7 @@ class ProductController extends Controller
 
                 DB::commit();
             }
+
 
             if (!$purchase_exist) {
                 $output = ['success' => 1,

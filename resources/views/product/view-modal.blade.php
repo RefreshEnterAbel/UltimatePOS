@@ -14,6 +14,8 @@
 						{{$product->brand->name ?? '--' }}<br>
 						<b>@lang('product.unit'): </b>
 						{{$product->unit->short_name ?? '--' }}<br>
+						<b>@lang('product.unit2'): </b>
+						{{$product->second_unit->short_name ?? '--' }}<br>
 						<b>@lang('product.barcode_type'): </b>
 						{{$product->barcode_type ?? '--' }}
 						@php 

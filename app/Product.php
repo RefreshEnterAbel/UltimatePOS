@@ -75,6 +75,13 @@ class Product extends Model
         return $this->belongsTo(\App\Unit::class);
     }
     /**
+    * Get the unit associated with the product.
+    */
+    public function second_unit()
+    {
+        return $this->belongsTo(\App\Unit::class,'unit2_id');
+    }
+    /**
      * Get category associated with the product.
      */
     public function category()

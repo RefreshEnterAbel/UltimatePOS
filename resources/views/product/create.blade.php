@@ -17,7 +17,7 @@
 @php
   $form_class = empty($duplicate_product) ? 'create' : '';
 @endphp
-{!! Form::open(['url' => action('ProductController@store'), 'method' => 'post', 
+{!! Form::open(['url' => action('ProductController@store'), 'method' => 'post',
     'id' => 'product_add_form','class' => 'product_form ' . $form_class, 'files' => true ]) !!}
     @component('components.widget', ['class' => 'box-primary'])
         <div class="row">
@@ -55,7 +55,18 @@
             </div>
           </div>
         </div>
-        
+        {{--   add 2nd unit for product     --}}
+        <div class="col-sm-4">
+                <div class="form-group">
+                    {!! Form::label('unit2_id', __('product.unit2') . ':*') !!}
+                    <div class="input-group">
+                        {!! Form::select('unit2_id', $units, !empty($duplicate_product->unit_id) ? $duplicate_product->unit_id : session('business.default_unit'), ['class' => 'form-control select2', 'required']); !!}
+                        <span class="input-group-btn">
+                <button type="button" @if(!auth()->user()->can('unit.create')) disabled @endif class="btn btn-default bg-white btn-flat btn-modal" data-href="{{action('UnitController@create', ['quick_add' => true])}}" title="@lang('unit.add_unit')" data-container=".view_modal"><i class="fa fa-plus-circle text-primary fa-lg"></i></button>
+              </span>
+                    </div>
+                </div>
+            </div>
         <div class="col-sm-4 @if(!session('business.enable_sub_units')) hide @endif">
           <div class="form-group">
             {!! Form::label('sub_unit_ids', __('lang_v1.related_sub_units') . ':') !!} @show_tooltip(__('lang_v1.sub_units_tooltip'))
@@ -105,9 +116,9 @@
           </div>
         </div>
 
-        
+
         <div class="clearfix"></div>
-        
+
         <div class="col-sm-4">
           <div class="form-group">
           <br>
@@ -226,16 +237,16 @@
             <div class="col-sm-3">
               <div class="form-group">
                 {!! Form::label('rack_' . $id,  $location . ':') !!}
-                
+
                 @if(session('business.enable_racks'))
-                  {!! Form::text('product_racks[' . $id . '][rack]', !empty($rack_details[$id]['rack']) ? $rack_details[$id]['rack'] : null, ['class' => 'form-control', 'id' => 'rack_' . $id, 
+                  {!! Form::text('product_racks[' . $id . '][rack]', !empty($rack_details[$id]['rack']) ? $rack_details[$id]['rack'] : null, ['class' => 'form-control', 'id' => 'rack_' . $id,
                     'placeholder' => __('lang_v1.rack')]); !!}
                 @endif
 
                 @if(session('business.enable_row'))
                   {!! Form::text('product_racks[' . $id . '][row]', !empty($rack_details[$id]['row']) ? $rack_details[$id]['row'] : null, ['class' => 'form-control', 'placeholder' => __('lang_v1.row')]); !!}
                 @endif
-                
+
                 @if(session('business.enable_position'))
                   {!! Form::text('product_racks[' . $id . '][position]', !empty($rack_details[$id]['position']) ? $rack_details[$id]['position'] : null, ['class' => 'form-control', 'placeholder' => __('lang_v1.position')]); !!}
                 @endif
@@ -243,7 +254,7 @@
             </div>
           @endforeach
         @endif
-        
+
         <div class="col-sm-4">
           <div class="form-group">
             {!! Form::label('weight',  __('lang_v1.weight') . ':') !!}
@@ -325,7 +336,7 @@
         </div>
 
         <input type="hidden" id="variation_counter" value="1">
-        <input type="hidden" id="default_profit_percent" 
+        <input type="hidden" id="default_profit_percent"
           value="{{ $default_profit_percent }}">
 
       </div>
@@ -347,12 +358,12 @@
 
         <button type="submit" value="submit" class="btn btn-primary submit_product_form">@lang('messages.save')</button>
       </div>
-      
+
       </div>
     </div>
   </div>
 {!! Form::close() !!}
-  
+
 </section>
 <!-- /.content -->
 
@@ -372,7 +383,7 @@
                     $('input#sku').val(sCode);
                 },
                 onScanError: function(oDebug) {
-                    console.log(oDebug); 
+                    console.log(oDebug);
                 },
                 minLength: 2,
                 ignoreIfFocusOn: ['input', '.form-control']
