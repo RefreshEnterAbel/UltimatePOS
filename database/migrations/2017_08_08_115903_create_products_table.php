@@ -21,6 +21,9 @@ class CreateProductsTable extends Migration
             $table->enum('type', ['single', 'variable']);
             $table->integer('unit_id')->unsigned();
             $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
+            // add second unit col
+            $table->integer('unit2_id')->unsigned();
+            $table->foreign('unit2_id')->references('id')->on('units')->onDelete('cascade');
             $table->integer('brand_id')->unsigned()->nullable();
             $table->foreign('brand_id')->references('id')->on('brands')->onDelete('cascade');
             $table->integer('category_id')->unsigned()->nullable();
@@ -42,6 +45,7 @@ class CreateProductsTable extends Migration
             $table->index('name');
             $table->index('business_id');
             $table->index('unit_id');
+            $table->index('unit2_id');
             $table->index('created_by');
         });
     }

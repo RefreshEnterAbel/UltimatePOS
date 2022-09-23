@@ -16,6 +16,7 @@ class ModifyProductsTableForModifiers extends Migration
     {
         DB::statement("ALTER TABLE products MODIFY COLUMN type ENUM('single','variable', 'modifier')");
         DB::statement("ALTER TABLE products MODIFY COLUMN unit_id INT(11) UNSIGNED DEFAULT NULL");
+        DB::statement("ALTER TABLE products MODIFY COLUMN unit2_id INT(11) UNSIGNED DEFAULT NULL");
     }
 
     /**

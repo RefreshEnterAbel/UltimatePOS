@@ -14,10 +14,12 @@ class AddSubUnitIdToPurchaseLinesAndSellLines extends Migration
     public function up()
     {
         Schema::table('purchase_lines', function (Blueprint $table) {
+            $table->integer('sub_unit2_id')->nullable()->after('lot_number');
             $table->integer('sub_unit_id')->nullable()->after('lot_number');
         });
 
         Schema::table('transaction_sell_lines', function (Blueprint $table) {
+            $table->integer('sub_unit2_id')->nullable()->after('parent_sell_line_id');
             $table->integer('sub_unit_id')->nullable()->after('parent_sell_line_id');
         });
     }

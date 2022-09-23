@@ -40,6 +40,7 @@ class AddMissingColumnIndexing extends Migration
         });
 
         Schema::table('purchase_lines', function (Blueprint $table) {
+            $table->index('sub_unit2_id');
             $table->index('sub_unit_id');
         });
 
