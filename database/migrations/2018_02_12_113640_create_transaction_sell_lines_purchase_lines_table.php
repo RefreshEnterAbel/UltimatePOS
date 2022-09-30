@@ -19,6 +19,7 @@ class CreateTransactionSellLinesPurchaseLinesTable extends Migration
             $table->integer('stock_adjustment_line_id')->unsigned()->comment("id from stock_adjustment_lines")->nullable();
             $table->integer('purchase_line_id')->unsigned()->comment("id from purchase_lines");
             $table->decimal('quantity', 22, 4);
+            $table->decimal('quantity_2', 22, 4);
             $table->timestamps();
         });
     }

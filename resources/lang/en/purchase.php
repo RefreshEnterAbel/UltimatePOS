@@ -37,6 +37,7 @@ return [
     'add_purchase' => 'Add Purchase',
     'purchase_date' => 'Purchase Date',
     'purchase_quantity' => 'Purchase Quantity',
+    'purchase_quantity_second_unit' => 'Purchase Quantity (2nd)',
     'unit_cost_before_tax' => 'Unit Cost (Before Tax)',
     'subtotal_before_tax' => 'Subtotal (Before Tax)',
     'product_tax' => 'Product Tax',

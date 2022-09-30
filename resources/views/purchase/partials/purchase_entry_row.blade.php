@@ -67,6 +67,59 @@
             @endif
         </td>
         <td>
+            @if(!empty($purchase_order_line))
+                {!! Form::hidden('purchases[' . $row_count . '][purchase_order_line_id]', $purchase_order_line->id ); !!}
+            @endif
+
+            {!! Form::hidden('purchases[' . $row_count . '][product_id]', $product->id ); !!}
+            {!! Form::hidden('purchases[' . $row_count . '][variation_id]', $variation->id , ['class' => 'hidden_variation_id']); !!}
+
+            @php
+                $check_decimal = 'false';
+                if($product->second_unit->allow_decimal == 0){
+                    $check_decimal = 'true';
+                }
+                $currency_precision = config('constants.currency_precision', 2);
+                $quantity_precision = config('constants.quantity_precision', 2);
+
+                $quantity_value = !empty($purchase_order_line) ? $purchase_order_line->quantity : 1;
+                $max_quantity = !empty($purchase_order_line) ? $purchase_order_line->quantity - $purchase_order_line->po_quantity_purchased : 0;
+
+                $quantity_value = !empty($imported_data) ? $imported_data['quantity'] : $quantity_value;
+            @endphp
+
+            <input type="text"
+                name="purchases[{{$row_count}}][quantity_second_unit]"
+                value="{{@format_quantity($quantity_value)}}"
+                class="form-control input-sm purchase_quantity input_number mousetrap"
+                required
+                data-rule-abs_digit={{$check_decimal}}
+                data-msg-abs_digit="{{__('lang_v1.decimal_value_not_allowed')}}"
+                @if(!empty($max_quantity))
+                    data-rule-max-value="{{$max_quantity}}"
+                    data-msg-max-value="{{__('lang_v1.max_quantity_quantity_allowed', ['quantity' => $max_quantity])}}"
+                @endif
+            >
+
+
+            <input type="hidden" class="base_unit_second_cost" value="{{$variation->default_purchase_price}}">
+            <input type="hidden" class="base_unit_second_selling_price" value="{{$variation->sell_price_inc_tax}}">
+
+            <input type="hidden" name="purchases[{{$row_count}}][product_second_unit_id]" value="{{$product->second_unit->id}}">
+            @if(!empty($second_sub_units))
+                <br>
+                <select name="purchases[{{$row_count}}][second_sub_unit_id]" class="form-control input-sm sub_unit">
+                    @foreach($second_sub_units as $key => $value)
+                        <option value="{{$key}}" data-multiplier="{{$value['multiplier']}}">
+                            {{$value['name']}}
+                        </option>
+                    @endforeach
+                </select>
+            @else
+                {{ $product->second_unit->short_name }}
+            @endif
+        </td>
+        <td>
             @php
                 $pp_without_discount = !empty($purchase_order_line) ? $purchase_order_line->pp_without_discount/$purchase_order->exchange_rate : $variation->default_purchase_price;
 

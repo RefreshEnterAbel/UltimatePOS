@@ -288,6 +288,7 @@ class PurchaseController extends Controller
      */
     public function store(Request $request)
     {
+        dd($request);
         if (!auth()->user()->can('purchase.create')) {
             abort(403, 'Unauthorized action.');
         }
@@ -396,7 +397,7 @@ class PurchaseController extends Controller
             
             $purchase_lines = [];
             $purchases = $request->input('purchases');
-
+            // TODO: implemented for second unit quantity
             $this->productUtil->createOrUpdatePurchaseLines($transaction, $purchases, $currency_details, $enable_product_editing);
 
             //Add Purchase payments
@@ -1030,10 +1031,11 @@ class PurchaseController extends Controller
             if (!empty($product_id)) {
                 $row_count = $request->input('row_count');
                 $product = Product::where('id', $product_id)
-                                    ->with(['unit'])
+                                    ->with(['unit','second_unit'])
                                     ->first();
                 
                 $sub_units = $this->productUtil->getSubUnits($business_id, $product->unit->id, false, $product_id);
+                $second_sub_units = $this->productUtil->getSubUnits($business_id, $product->second_unit->id, false, $product_id);
 
                 $query = Variation::where('product_id', $product_id)
                                 ->with([
@@ -1061,6 +1063,7 @@ class PurchaseController extends Controller
                         'currency_details',
                         'hide_tax',
                         'sub_units',
+                        'second_sub_units',
                         'is_purchase_order'
                     ));
             }

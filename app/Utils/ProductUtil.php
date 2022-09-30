@@ -343,6 +343,7 @@ class ProductUtil extends Util
         } else {
             $qty_difference = $new_quantity - $old_quantity;
         }
+        // TODO: Make qty2_difference
 
         $product = Product::find($product_id);
 
@@ -369,6 +370,7 @@ class ProductUtil extends Util
                 $variation_location_d->qty_available = 0;
             }
 
+            // TODO: save qty2_available for qty2_difference
             $variation_location_d->qty_available += $qty_difference;
             $variation_location_d->save();
         }
@@ -1155,25 +1157,40 @@ class ProductUtil extends Util
         
         foreach ($input_data as $data) {
             $multiplier = 1;
+
             if (isset($data['sub_unit_id']) && $data['sub_unit_id'] == $data['product_unit_id']) {
                 unset($data['sub_unit_id']);
             }
-
             if (!empty($data['sub_unit_id'])) {
                 $unit = Unit::find($data['sub_unit_id']);
                 $multiplier = !empty($unit->base_unit_multiplier) ? $unit->base_unit_multiplier : 1;
             }
             $new_quantity = $this->num_uf($data['quantity']) * $multiplier;
-
             $new_quantity_f = $this->num_f($new_quantity);
             $old_qty = 0;
+            // Finished : create new variable fo second unit
+            $multiplier2 = 1;
+            // Finished: add  for second_sub_unit_id
+            if (isset($data['second_sub_unit_id']) && $data['second_sub_unit_id'] == $data['product_second_unit_id']) {
+                unset($data['second_sub_unit_id']);
+            }
+            // Finished: For second_sub_unit_id check and calculator multiplier
+            if (!empty($data['second_sub_unit_id'])) {
+                $unit = Unit::find($data['second_sub_unit_id']);
+                $multiplier2 = !empty($unit->base_unit_multiplier) ? $unit->base_unit_multiplier : 1;
+            }
+
+            // Finished: create new variable for second quantity
+            $new_quantity2 = $this->num_uf($data['quantity_second_unit']) * $multiplier2;
+            $new_quantity2_f = $this->num_f($new_quantity2);
+            $old_qty2 = 0;
+
             //update existing purchase line
             if (isset($data['purchase_line_id'])) {
                 $purchase_line = PurchaseLine::findOrFail($data['purchase_line_id']);
                 $updated_purchase_line_ids[] = $purchase_line->id;
-                $old_qty = $purchase_line->quantity;
-
-                $this->updateProductStock($before_status, $transaction, $data['product_id'], $data['variation_id'], $new_quantity, $purchase_line->quantity, $currency_details);
+                // TODO add  quantity 2 as parameter
+                $this->updateProductStock($before_status, $transaction, $data['product_id'], $data['variation_id'], $new_quantity, $purchase_line->quantity, $currency_details,$new_quantity2, $purchase_line->quantity_2);
             } else {
                 //create newly added purchase lines
                 $purchase_line = new PurchaseLine();
@@ -1187,6 +1204,7 @@ class ProductUtil extends Util
             }
 
             $purchase_line->quantity = $new_quantity;
+            // TODO: add $purchase_line quantity_2
             $purchase_line->pp_without_discount = ($this->num_uf($data['pp_without_discount'], $currency_details)*$exchange_rate) / $multiplier;
             $purchase_line->discount_percent = $this->num_uf($data['discount_percent'], $currency_details);
             $purchase_line->purchase_price = ($this->num_uf($data['purchase_price'], $currency_details)*$exchange_rate) / $multiplier;
@@ -1197,6 +1215,7 @@ class ProductUtil extends Util
             $purchase_line->mfg_date = !empty($data['mfg_date']) ? $this->uf_date($data['mfg_date']) : null;
             $purchase_line->exp_date = !empty($data['exp_date']) ? $this->uf_date($data['exp_date']) : null;
             $purchase_line->sub_unit_id = !empty($data['sub_unit_id']) ? $data['sub_unit_id'] : null;
+            // TODO: add $purchase_line second sub_unit_id
             $purchase_line->purchase_order_line_id = !empty($data['purchase_order_line_id']) ? $data['purchase_order_line_id'] : null;
         
             $updated_purchase_lines[] = $purchase_line;
@@ -1288,7 +1307,7 @@ class ProductUtil extends Util
      * @param array $currency_details
      *
      */
-    public function updateProductStock($status_before, $transaction, $product_id, $variation_id, $new_quantity, $old_quantity, $currency_details)
+    public function updateProductStock($status_before, $transaction, $product_id, $variation_id, $new_quantity, $old_quantity, $currency_details,$new_quantity2, $old_quantity2)
     {
         $new_quantity_f = $this->num_f($new_quantity);
         $old_qty = $this->num_f($old_quantity);
