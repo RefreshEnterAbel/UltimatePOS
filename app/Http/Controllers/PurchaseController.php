@@ -288,7 +288,6 @@ class PurchaseController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request);
         if (!auth()->user()->can('purchase.create')) {
             abort(403, 'Unauthorized action.');
         }
@@ -397,7 +396,7 @@ class PurchaseController extends Controller
             
             $purchase_lines = [];
             $purchases = $request->input('purchases');
-            // TODO: implemented for second unit quantity
+            // Finished: implemented for second unit quantity
             $this->productUtil->createOrUpdatePurchaseLines($transaction, $purchases, $currency_details, $enable_product_editing);
 
             //Add Purchase payments

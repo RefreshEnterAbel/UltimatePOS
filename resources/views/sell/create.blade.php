@@ -385,6 +385,9 @@
 								<th class="text-center">
 									@lang('sale.qty')
 								</th>
+								<th class="text-center">
+									@lang('sale.qty2')
+								</th>
 								@if(!empty($pos_settings['inline_service_staff']))
 									<th class="text-center">
 										@lang('restaurant.service_staff')
@@ -419,7 +422,7 @@
 						<tr>
 							<td>
 								<div class="pull-right">
-								<b>@lang('sale.item'):</b> 
+								<b>@lang('sale.item'):</b>
 								<span class="total_quantity">0</span>
 								&nbsp;&nbsp;&nbsp;&nbsp;
 								<b>@lang('sale.total'): </b>

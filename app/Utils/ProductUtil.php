@@ -336,14 +336,18 @@ class ProductUtil extends Util
      *
      * @return boolean
      */
-    public function updateProductQuantity($location_id, $product_id, $variation_id, $new_quantity, $old_quantity = 0, $number_format = null, $uf_data = true)
+    public function updateProductQuantity($location_id, $product_id, $variation_id, $new_quantity, $old_quantity = 0, $number_format = null, $uf_data = true,$new_quantity2, $old_quantity2 = 0)
     {
+        // Finished: Make qty2_difference
         if ($uf_data) {
             $qty_difference = $this->num_uf($new_quantity, $number_format) - $this->num_uf($old_quantity, $number_format);
+            $qty2_difference = $this->num_uf($new_quantity2, $number_format) - $this->num_uf($old_quantity2, $number_format);
         } else {
             $qty_difference = $new_quantity - $old_quantity;
+            $qty2_difference = $new_quantity2 - $old_quantity2;
         }
-        // TODO: Make qty2_difference
+
+
 
         $product = Product::find($product_id);
 
@@ -368,10 +372,12 @@ class ProductUtil extends Util
                 $variation_location_d->location_id = $location_id;
                 $variation_location_d->product_variation_id = $variation->product_variation_id;
                 $variation_location_d->qty_available = 0;
+                $variation_location_d->qty2_available = 0;
             }
 
-            // TODO: save qty2_available for qty2_difference
+            // Finished: save qty2_available for qty2_difference
             $variation_location_d->qty_available += $qty_difference;
+            $variation_location_d->qty2_available += $qty2_difference;
             $variation_location_d->save();
         }
         
@@ -389,9 +395,10 @@ class ProductUtil extends Util
      *
      * @return boolean
      */
-    public function decreaseProductQuantity($product_id, $variation_id, $location_id, $new_quantity, $old_quantity = 0)
+    public function decreaseProductQuantity($product_id, $variation_id, $location_id, $new_quantity, $old_quantity = 0,$new_quantity2, $old_quantity2 = 0)
     {
         $qty_difference = $new_quantity - $old_quantity;
+        $qty2_difference = $new_quantity2 - $old_quantity2;
 
         $product = Product::find($product_id);
 
@@ -411,11 +418,13 @@ class ProductUtil extends Util
                             'location_id' => $location_id,
                             'variation_id' => $variation_id,
                             'product_variation_id' => $variation->product_variation_id,
-                            'qty_available' => 0
+                            'qty_available' => 0,
+                            'qty2_available' => 0
                           ]);
             }
             
             $details->decrement('qty_available', $qty_difference);
+            $details->decrement('qty2_available', $qty2_difference);
         }
 
         return true;
@@ -1183,13 +1192,13 @@ class ProductUtil extends Util
             // Finished: create new variable for second quantity
             $new_quantity2 = $this->num_uf($data['quantity_second_unit']) * $multiplier2;
             $new_quantity2_f = $this->num_f($new_quantity2);
-            $old_qty2 = 0;
 
             //update existing purchase line
             if (isset($data['purchase_line_id'])) {
                 $purchase_line = PurchaseLine::findOrFail($data['purchase_line_id']);
                 $updated_purchase_line_ids[] = $purchase_line->id;
-                // TODO add  quantity 2 as parameter
+                // Finished add  quantity 2 as parameter
+                dd($new_quantity2);
                 $this->updateProductStock($before_status, $transaction, $data['product_id'], $data['variation_id'], $new_quantity, $purchase_line->quantity, $currency_details,$new_quantity2, $purchase_line->quantity_2);
             } else {
                 //create newly added purchase lines
@@ -1199,12 +1208,13 @@ class ProductUtil extends Util
 
                 //Increase quantity only if status is received
                 if ($transaction->status == 'received') {
-                    $this->updateProductQuantity($transaction->location_id, $data['product_id'], $data['variation_id'], $new_quantity_f, 0, $currency_details);
+                    $this->updateProductQuantity($transaction->location_id, $data['product_id'], $data['variation_id'], $new_quantity_f, 0, $currency_details,true,$new_quantity2_f,0);
                 }
             }
 
             $purchase_line->quantity = $new_quantity;
-            // TODO: add $purchase_line quantity_2
+            // Finished: add $purchase_line quantity_2
+            $purchase_line->quantity_2 = $new_quantity2;
             $purchase_line->pp_without_discount = ($this->num_uf($data['pp_without_discount'], $currency_details)*$exchange_rate) / $multiplier;
             $purchase_line->discount_percent = $this->num_uf($data['discount_percent'], $currency_details);
             $purchase_line->purchase_price = ($this->num_uf($data['purchase_price'], $currency_details)*$exchange_rate) / $multiplier;
@@ -1215,7 +1225,8 @@ class ProductUtil extends Util
             $purchase_line->mfg_date = !empty($data['mfg_date']) ? $this->uf_date($data['mfg_date']) : null;
             $purchase_line->exp_date = !empty($data['exp_date']) ? $this->uf_date($data['exp_date']) : null;
             $purchase_line->sub_unit_id = !empty($data['sub_unit_id']) ? $data['sub_unit_id'] : null;
-            // TODO: add $purchase_line second sub_unit_id
+            // Finished: add $purchase_line second sub_unit_id
+            $purchase_line->sub_unit2_id  = !empty($data['second_sub_unit_id']) ? $data['second_sub_unit_id'] : null;
             $purchase_line->purchase_order_line_id = !empty($data['purchase_order_line_id']) ? $data['purchase_order_line_id'] : null;
         
             $updated_purchase_lines[] = $purchase_line;
@@ -1309,22 +1320,27 @@ class ProductUtil extends Util
      */
     public function updateProductStock($status_before, $transaction, $product_id, $variation_id, $new_quantity, $old_quantity, $currency_details,$new_quantity2, $old_quantity2)
     {
+        dd($new_quantity2);
         $new_quantity_f = $this->num_f($new_quantity);
         $old_qty = $this->num_f($old_quantity);
+        $new_quantity2_f = $this->num_f($new_quantity2);
+        $old_qty2 = $this->num_f($old_quantity2);
         //Update quantity for existing products
         if ($status_before == 'received' && $transaction->status == 'received') {
             //if status received update existing quantity
-            $this->updateProductQuantity($transaction->location_id, $product_id, $variation_id, $new_quantity_f, $old_qty, $currency_details);
+            $this->updateProductQuantity($transaction->location_id, $product_id, $variation_id, $new_quantity_f, $old_qty, $currency_details,$new_quantity2_f,$old_qty2);
         } elseif ($status_before == 'received' && $transaction->status != 'received') {
             //decrease quantity only if status changed from received to not received
             $this->decreaseProductQuantity(
                 $product_id,
                 $variation_id,
                 $transaction->location_id,
-                $old_quantity
+                $old_quantity,
+                $old_quantity2
+
             );
         } elseif ($status_before != 'received' && $transaction->status == 'received') {
-            $this->updateProductQuantity($transaction->location_id, $product_id, $variation_id, $new_quantity_f, 0, $currency_details);
+            $this->updateProductQuantity($transaction->location_id, $product_id, $variation_id, $new_quantity_f, 0, $currency_details,$new_quantity2_f,0);
         }
     }
 
@@ -1562,6 +1578,7 @@ class ProductUtil extends Util
                 ->active()
                 ->whereNull('variations.deleted_at')
                 ->leftjoin('units as U', 'products.unit_id', '=', 'U.id')
+                ->leftjoin('units as U2', 'products.unit2_id', '=', 'U2.id')
                 ->leftjoin(
                     'variation_location_details AS VLD',
                     function ($join) use ($location_id) {
@@ -1579,6 +1596,7 @@ class ProductUtil extends Util
                         }
                     }
                 );
+
 
         if (!is_null($not_for_selling)) {
             $query->where('products.not_for_selling', $not_for_selling);
@@ -1684,9 +1702,11 @@ class ProductUtil extends Util
                 'variations.id as variation_id',
                 'variations.name as variation',
                 'VLD.qty_available',
+                'VLD.qty2_available',
                 'variations.sell_price_inc_tax as selling_price',
                 'variations.sub_sku',
-                'U.short_name as unit'
+                'U.short_name as unit',
+                'U2.short_name as unit2'
             );
 
         if (!empty($price_group_id)) {
