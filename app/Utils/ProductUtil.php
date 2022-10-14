@@ -467,7 +467,9 @@ class ProductUtil extends Util
         $query = Variation::join('products AS p', 'variations.product_id', '=', 'p.id')
                 ->join('product_variations AS pv', 'variations.product_variation_id', '=', 'pv.id')
                 ->leftjoin('variation_location_details AS vld', 'variations.id', '=', 'vld.variation_id')
-                ->leftjoin('units', 'p.unit_id', '=', 'units.id')
+                ->leftjoin('units as U', 'p.unit_id', '=', 'U.id')
+                ->leftjoin('units as U2', 'p.unit2_id', '=', 'U2.id')
+                // DONE : Add for second unit ->leftjoin('units', 'p.unit_id', '=', 'units.id')
                 ->leftjoin('brands', function ($join) {
                     $join->on('p.brand_id', '=', 'brands.id')
                         ->whereNull('brands.deleted_at');
@@ -509,13 +511,17 @@ class ProductUtil extends Util
             'variations.sub_sku',
             'p.barcode_type',
             'vld.qty_available',
+            'vld.qty2_available',
             'variations.default_sell_price',
             'variations.sell_price_inc_tax',
             'variations.id as variation_id',
             'variations.combo_variations',  //Used in combo products
-            'units.short_name as unit',
-            'units.id as unit_id',
-            'units.allow_decimal as unit_allow_decimal',
+            'U.short_name as unit',
+            'U2.short_name as unit2',
+            'U.id as unit_id',
+            'U2.id as unit2_id',
+            'U.allow_decimal as unit_allow_decimal',
+            'U2.allow_decimal as unit2_allow_decimal',
             'brands.name as brand',
             DB::raw("(SELECT purchase_price_inc_tax FROM purchase_lines WHERE 
                         variation_id=variations.id ORDER BY id DESC LIMIT 1) as last_purchased_price")

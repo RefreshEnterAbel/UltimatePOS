@@ -20,7 +20,7 @@ return [
     'category' => 'Category',
     'sub_category' => 'Sub category',
     'unit' => 'Unit',
-    'unit2' => 'Second Unit',
+    'unit2' => 'Kesha Unit',
     'brand' => 'Brand',
     'tax' => 'Tax',
     'sku' => 'SKU',

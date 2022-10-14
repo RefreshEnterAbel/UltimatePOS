@@ -491,6 +491,10 @@ class SellPosController extends Controller
                     foreach ($input['products'] as $product) {
                         $decrease_qty = $this->productUtil
                                     ->num_uf($product['quantity']);
+                        // TODO : Decrease quantity two
+                        $decrease_qty2 = $this->productUtil
+                            ->num_uf($product['quantity_2']);
+
                         if (!empty($product['base_unit_multiplier'])) {
                             $decrease_qty = $decrease_qty * $product['base_unit_multiplier'];
                         }
@@ -500,7 +504,9 @@ class SellPosController extends Controller
                                 $product['product_id'],
                                 $product['variation_id'],
                                 $input['location_id'],
-                                $decrease_qty
+                                $decrease_qty,
+                                0,
+                                $decrease_qty2
                             );
                         }
 
@@ -1442,8 +1448,11 @@ class SellPosController extends Controller
         }
 
         $product->formatted_qty_available = $this->productUtil->num_f($product->qty_available, false, null, true);
+        $product->formatted_qty2_available = $this->productUtil->num_f($product->qty2_available, false, null, true);
+
 
         $sub_units = $this->productUtil->getSubUnits($business_id, $product->unit_id, false, $product->product_id);
+        $second_sub_units = $this->productUtil->getSubUnits($business_id, $product->unit2_id, false, $product->product_id);
 
         //Get customer group and change the price accordingly
         $customer_id = request()->get('customer_id', null);
@@ -1508,7 +1517,7 @@ class SellPosController extends Controller
             }
 
             $output['html_content'] =  view('sale_pos.product_row')
-                        ->with(compact('product', 'row_count', 'tax_dropdown', 'enabled_modules', 'pos_settings', 'sub_units', 'discount', 'waiters', 'edit_discount', 'edit_price', 'purchase_line_id', 'warranties', 'quantity', 'is_direct_sell', 'so_line', 'is_sales_order'))
+                        ->with(compact('product', 'row_count', 'tax_dropdown', 'enabled_modules', 'pos_settings', 'sub_units','second_sub_units', 'discount', 'waiters', 'edit_discount', 'edit_price', 'purchase_line_id', 'warranties', 'quantity', 'is_direct_sell', 'so_line', 'is_sales_order'))
                         ->render();
         }
 

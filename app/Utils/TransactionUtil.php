@@ -285,6 +285,7 @@ class TransactionUtil extends Util
                 $edit_ids = array_merge($edit_ids, $edit_id_temp);
 
                 //update or create modifiers for existing sell lines
+                // TODO : based on second quantity update or create modifiers for existing sell lines
                 if ($this->isModuleEnabled('modifiers')) {
                     if (!empty($product['modifier'])) {
                         foreach ($product['modifier'] as $key => $value) {
@@ -331,6 +332,7 @@ class TransactionUtil extends Util
                     }
                 }
                 $uf_quantity = $uf_data ? $this->num_uf($product['quantity']) : $product['quantity'];
+                $uf_quantity2 = $uf_data ? $this->num_uf($product['quantity_2']) : $product['quantity_2'];
                 $uf_item_tax = $uf_data ?$this->num_uf($product['item_tax']) : $product['item_tax'];
                 $uf_unit_price_inc_tax = $uf_data ? $this->num_uf($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
 
@@ -347,6 +349,7 @@ class TransactionUtil extends Util
                     'product_id' => $product['product_id'],
                     'variation_id' => $product['variation_id'],
                     'quantity' =>  $uf_quantity * $multiplier,
+                    'quantity_2' =>  $uf_quantity2,
                     'unit_price_before_discount' => $unit_price_before_discount,
                     'unit_price' => $unit_price,
                     'line_discount_type' => !empty($product['line_discount_type']) ? $product['line_discount_type'] : null,
@@ -399,6 +402,7 @@ class TransactionUtil extends Util
                 $sell_line_warranties[] = !empty($product['warranty_id']) ? $product['warranty_id'] : 0;
 
                 //Update purchase order line quantity received
+                //TODO: Quantity 2 invoice Update purchase order line quantity received
                 $this->updateSalesOrderLine($line['so_line_id'], $line['quantity'], 0);
             }
         }
@@ -468,6 +472,7 @@ class TransactionUtil extends Util
 
     private function updateSalesOrderLine($so_line_id, $new_qty, $old_qty = 0)
     {
+        //TODO: Quantity 2 invoice Update purchase order line quantity received
         $diff = $new_qty - $old_qty;
         if (!empty($so_line_id) && !empty($diff)) {
             $so_line = TransactionSellLine::find($so_line_id);

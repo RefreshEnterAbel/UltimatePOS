@@ -2,7 +2,6 @@
 	$common_settings = session()->get('business.common_settings');
 	$multiplier = 1;
 @endphp
-
 @foreach($sub_units as $key => $value)
 	@if(!empty($product->sub_unit_id) && $product->sub_unit_id == $key)
 		@php
@@ -108,10 +107,13 @@
 
 		@php
 			$max_quantity = $product->qty_available;
+			$max_quantity_2 = $product->qty2_available;
 			$formatted_max_quantity = $product->formatted_qty_available;
+			$formatted_max_quantity2 = $product->formatted_qty2_available;
 
 			if(!empty($action) && $action == 'edit') {
 				if(!empty($so_line)) {
+                    // TODO:  edit qty available for quantity 2
 					$qty_available = $so_line->quantity - $so_line->so_quantity_invoiced + $product->quantity_ordered;
 					$max_quantity = $qty_available;
 					$formatted_max_quantity = number_format($qty_available, config('constants.currency_precision', 2), session('currency')['decimal_separator'], session('currency')['thousand_separator']);
@@ -122,10 +124,12 @@
 					$formatted_max_quantity = $so_line->formatted_qty_available;
 				}
 			}
-			
+
 
 			$max_qty_rule = $max_quantity;
+			$max_qty2_rule = $max_quantity_2;
 			$max_qty_msg = __('validation.custom-messages.quantity_not_available', ['qty'=> $formatted_max_quantity, 'unit' => $product->unit  ]);
+			$max_qty2_msg = __('validation.custom-messages.quantity_not_available', ['qty'=> $formatted_max_quantity2, 'unit' => $product->unit2  ]);
 		@endphp
 
 		@if( session()->get('business.enable_lot_number') == 1 || session()->get('business.enable_product_expiry') == 1)
@@ -310,47 +314,13 @@
 
 	<td>
 		{{-- If edit then transaction sell lines will be present --}}
-		@if(!empty($product->transaction_sell_lines_id))
-			<input type="hidden" name="products[{{$row_count}}][transaction_sell_lines_id]" class="form-control" value="{{$product->transaction_sell_lines_id}}">
-		@endif
-
-		<input type="hidden" name="products[{{$row_count}}][product_id]" class="form-control product_id" value="{{$product->product_id}}">
-
-		<input type="hidden" value="{{$product->variation_id}}"
-			   name="products[{{$row_count}}][variation_id]" class="row_variation_id">
-
-		<input type="hidden" value="{{$product->enable_stock}}"
-			   name="products[{{$row_count}}][enable_stock]">
-
-		@if(empty($product->quantity_ordered))
-			@php
-				$product->quantity_ordered = 1;
-			@endphp
-		@endif
-
 		@php
-			$allow_decimal = true;
-			if($product->unit_allow_decimal != 1) {
-				$allow_decimal = false;
+
+			$unit2_allow_decimal = true;
+			if($product->unit2_allow_decimal != 1) {
+				$unit2_allow_decimal = false;
 			}
 		@endphp
-		@foreach($sub_units as $key => $value)
-			@if(!empty($product->sub_unit_id) && $product->sub_unit_id == $key)
-				@php
-					$max_qty_rule = $max_qty_rule / $multiplier;
-                    $unit_name = $value['name'];
-                    $max_qty_msg = __('validation.custom-messages.quantity_not_available', ['qty'=> $max_qty_rule, 'unit' => $unit_name  ]);
-
-                    if(!empty($product->lot_no_line_id)){
-                        $max_qty_msg = __('lang_v1.quantity_error_msg_in_lot', ['qty'=> $max_qty_rule, 'unit' => $unit_name  ]);
-                    }
-
-                    if($value['allow_decimal']) {
-                        $allow_decimal = true;
-                    }
-				@endphp
-			@endif
-		@endforeach
 		<div class="input-group input-number">
 			<span class="input-group-btn">
 				<button type="button" class="btn btn-default btn-flat quantity-down">
@@ -359,8 +329,8 @@
 			</span>
 			<input type="text" data-min="1"
 				   class="form-control pos_quantity input_number mousetrap input_quantity"
-				   value="{{@format_quantity($product->quantity_ordered)}}" name="products[{{$row_count}}][quantity]" data-allow-overselling="@if(empty($pos_settings['allow_overselling'])){{'false'}}@else{{'true'}}@endif"
-				   @if($allow_decimal)
+				   value="{{@format_quantity($product->quantity_ordered)}}" name="products[{{$row_count}}][quantity_2]" data-allow-overselling="@if(empty($pos_settings['allow_overselling'])){{'false'}}@else{{'true'}}@endif"
+				   @if($unit2_allow_decimal)
 					   data-decimal=1
 				   @else
 					   data-decimal=0
@@ -370,72 +340,29 @@
 				   data-rule-required="true"
 				   data-msg-required="@lang('validation.custom-messages.this_field_is_required')"
 				   @if($product->enable_stock && empty($pos_settings['allow_overselling']) && empty($is_sales_order) )
-					   data-rule-max-value="{{$max_qty_rule}}" data-qty_available="{{$product->qty_available}}" data-msg-max-value="{{$max_qty_msg}}"
-				   data-msg_max_default="@lang('validation.custom-messages.quantity_not_available', ['qty'=> $product->formatted_qty_available, 'unit' => $product->unit  ])"
+					   data-rule-max-value="{{$max_qty2_rule}}" data-qty_available="{{$product->qty2_available}}" data-msg-max-value="{{$max_qty2_msg}}"
+				   data-msg_max_default="@lang('validation.custom-messages.quantity_not_available', ['qty'=> $product->formatted_qty2_available, 'unit' => $product->unit2  ])"
 					@endif
 			>
-			<span class="input-group-btn"><button type="button" class="btn btn-default btn-flat quantity-up">
+			<span class="input-group-btn">
+				<button type="button" class="btn btn-default btn-flat quantity-up">
 				<i class="fa fa-plus text-success"></i>
 			</button>
 		</span>
 		</div>
 
 		<input type="hidden" name="products[{{$row_count}}][product_unit_id]" value="{{$product->unit_id}}">
-		@if(count($sub_units) > 0)
+		@if(count($second_sub_units) > 0)
 			<br>
 			<select name="products[{{$row_count}}][sub_unit_id]" class="form-control input-sm sub_unit">
-				@foreach($sub_units as $key => $value)
+				@foreach($second_sub_units as $key => $value)
 					<option value="{{$key}}" data-multiplier="{{$value['multiplier']}}" data-unit_name="{{$value['name']}}" data-allow_decimal="{{$value['allow_decimal']}}" @if(!empty($product->sub_unit_id) && $product->sub_unit_id == $key) selected @endif>
 						{{$value['name']}}
 					</option>
 				@endforeach
 			</select>
 		@else
-			{{$product->unit}}
-		@endif
-
-		<input type="hidden" class="base_unit_multiplier" name="products[{{$row_count}}][base_unit_multiplier]" value="{{$multiplier}}">
-
-		<input type="hidden" class="hidden_base_unit_sell_price" value="{{$product->default_sell_price / $multiplier}}">
-
-		{{-- Hidden fields for combo products --}}
-		@if($product->product_type == 'combo'&& !empty($product->combo_products))
-
-			@foreach($product->combo_products as $k => $combo_product)
-
-				@if(isset($action) && $action == 'edit')
-					@php
-						$combo_product['qty_required'] = $combo_product['quantity'] / $product->quantity_ordered;
-
-						$qty_total = $combo_product['quantity'];
-					@endphp
-				@else
-					@php
-						$qty_total = $combo_product['qty_required'];
-					@endphp
-				@endif
-
-				<input type="hidden"
-					   name="products[{{$row_count}}][combo][{{$k}}][product_id]"
-					   value="{{$combo_product['product_id']}}">
-
-				<input type="hidden"
-					   name="products[{{$row_count}}][combo][{{$k}}][variation_id]"
-					   value="{{$combo_product['variation_id']}}">
-
-				<input type="hidden"
-					   class="combo_product_qty"
-					   name="products[{{$row_count}}][combo][{{$k}}][quantity]"
-					   data-unit_quantity="{{$combo_product['qty_required']}}"
-					   value="{{$qty_total}}">
-
-				@if(isset($action) && $action == 'edit')
-					<input type="hidden"
-						   name="products[{{$row_count}}][combo][{{$k}}][transaction_sell_lines_id]"
-						   value="{{$combo_product['id']}}">
-				@endif
-
-			@endforeach
+			{{$product->unit2}}
 		@endif
 	</td>
 	@if(!empty($is_direct_sell))
