@@ -332,7 +332,6 @@ class ReportController extends Controller
             //To show stock details on view product modal
             if ($for == 'view_product' && !empty(request()->input('product_id'))) {
                 $product_stock_details = $products;
-
                 return view('product.partials.product_stock_details')->with(compact('product_stock_details'));
             }
 
@@ -340,7 +339,8 @@ class ReportController extends Controller
                 ->editColumn('stock', function ($row) {
                     if ($row->enable_stock) {
                         $stock = $row->stock ? $row->stock : 0 ;
-                        return  '<span class="current_stock" data-orig-value="' . (float)$stock . '" data-unit="' . $row->unit . '"> ' . $this->transactionUtil->num_f($stock, false, null, true) . '</span>' . ' ' . $row->unit ;
+                        $stock2 = $row->stock2 ? $row->stock2 : 0 ;
+                        return  '<span class="current_stock" data-orig-value="' . (float)$stock . '" data-unit="' . $row->unit . '"> ' . $this->transactionUtil->num_f($stock, false, null, true) . '</span>' . ' ' . $row->unit .'<br/>'.  $this->transactionUtil->num_f($stock2, false, null, true).' '. $row->unit2;
                     } else {
                         return '--';
                     }

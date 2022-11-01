@@ -73,6 +73,7 @@ class ProductController extends Controller
             $query = Product::with(['media'])
                 ->leftJoin('brands', 'products.brand_id', '=', 'brands.id')
                 ->join('units', 'products.unit_id', '=', 'units.id')
+                ->join('units as units2', 'products.unit2_id', '=', 'units2.id')
                 ->leftJoin('categories as c1', 'products.category_id', '=', 'c1.id')
                 ->leftJoin('categories as c2', 'products.sub_category_id', '=', 'c2.id')
                 ->leftJoin('tax_rates', 'products.tax', '=', 'tax_rates.id')
@@ -111,7 +112,7 @@ class ProductController extends Controller
                 'c1.name as category',
                 'c2.name as sub_category',
                 'units.actual_name as unit',
-                'units.actual_name as unit2',
+                'units2.actual_name as unit2',
                 'brands.name as brand',
                 'tax_rates.name as tax',
                 'products.sku',
@@ -124,6 +125,7 @@ class ProductController extends Controller
                 'products.product_custom_field3',
                 'products.product_custom_field4',
                 DB::raw('SUM(vld.qty_available) as current_stock'),
+                DB::raw('SUM(vld.qty2_available) as current_stock2'),
                 DB::raw('MAX(v.sell_price_inc_tax) as max_price'),
                 DB::raw('MIN(v.sell_price_inc_tax) as min_price'),
                 DB::raw('MAX(v.dpp_inc_tax) as max_purchase_price'),
@@ -275,7 +277,8 @@ class ProductController extends Controller
                 ->addColumn('mass_delete', function ($row) {
                     return  '<input type="checkbox" class="row-select" value="' . $row->id .'">' ;
                 })
-                ->editColumn('current_stock', '@if($enable_stock == 1) {{@number_format($current_stock)}} @else -- @endif {{$unit}}')
+                ->editColumn('current_stock',
+                    '@if($enable_stock == 1) {{@number_format($current_stock)}} {{$unit}} | {{@number_format($current_stock2)}} {{$unit2}} @else -- @endif')
                 ->addColumn(
                     'purchase_price',
                     '<div style="white-space: nowrap;">@format_currency($min_purchase_price) @if($max_purchase_price != $min_purchase_price && $type == "variable") -  @format_currency($max_purchase_price)@endif </div>'
@@ -583,7 +586,6 @@ class ProductController extends Controller
 
         $business_id = request()->session()->get('user.business_id');
         $details = $this->productUtil->getRackDetails($business_id, $id, true);
-
         return view('product.show')->with(compact('details'));
     }
 

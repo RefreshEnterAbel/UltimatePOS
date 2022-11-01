@@ -9,6 +9,7 @@
 		                <th>@lang('business.location')</th>
 		                <th>@lang('sale.unit_price')</th>
 		                <th>@lang('report.current_stock')</th>
+		                <th>@lang('report.current_stock2')</th>
 		                <th>@lang('lang_v1.total_stock_price')</th>
 		                <th>@lang('report.total_unit_sold')</th>
 		                <th>@lang('lang_v1.total_unit_transfered')</th>
@@ -34,6 +35,9 @@
                         	</td>
 	            			<td>
                         		<span data-is_quantity="true" class="display_currency"data-currency_symbol=false >{{$product->stock ?? 0}}</span>{{$product->unit}}
+                        	</td>
+							<td>
+                        		<span data-is_quantity="true" class="display_currency"data-currency_symbol=false >{{$product->stock2 ?? 0}}</span>{{$product->unit2}}
                         	</td>
                         	<td>
                         		<span class="display_currency"data-currency_symbol=true >{{$product->unit_price * $product->stock}}</span>

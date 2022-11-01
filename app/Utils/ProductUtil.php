@@ -1732,6 +1732,7 @@ class ProductUtil extends Util
     {
         $query = Variation::join('products as p', 'p.id', '=', 'variations.product_id')
                   ->join('units', 'p.unit_id', '=', 'units.id')
+                  ->join('units as units2', 'p.unit2_id', '=', 'units2.id')
                   ->leftjoin('variation_location_details as vld', 'variations.id', '=', 'vld.variation_id')
                   ->leftjoin('business_locations as l', 'vld.location_id', '=', 'l.id')
                   ->join('product_variations as pv', 'variations.product_variation_id', '=', 'pv.id')
@@ -1828,11 +1829,13 @@ class ProductUtil extends Util
                   WHERE (transactions.status='received' OR transactions.type='purchase_return')  AND transactions.location_id=vld.location_id 
                   AND (pl.variation_id=variations.id)) as stock_price"),
             DB::raw("SUM(vld.qty_available) as stock"),
+            DB::raw("SUM(vld.qty2_available) as stock2"),
             'variations.sub_sku as sku',
             'p.name as product',
             'p.type',
             'p.id as product_id',
             'units.short_name as unit',
+            'units2.short_name as unit2',
             'p.enable_stock as enable_stock',
             'variations.sell_price_inc_tax as unit_price',
             'pv.name as product_variation',
