@@ -32,7 +32,7 @@ return [
     'stock_report' => 'Stock Report',
     'products' => 'Products',
     'current_stock' => 'Current stock',
-    'current_stock2' => 'Current stock(Kesha)',
+    'current_stock2' => 'Current stock(2nd unit)',
     'total_unit_sold' => 'Total unit sold',
     'tax_report' => 'Tax Report',
     'tax_report_msg' => 'Tax details for  the selected date range',
