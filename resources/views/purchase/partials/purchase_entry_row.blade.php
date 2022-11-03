@@ -91,7 +91,7 @@
             <input type="text"
                 name="purchases[{{$row_count}}][quantity_second_unit]"
                 value="{{@format_quantity($quantity_value)}}"
-                class="form-control input-sm purchase_quantity input_number mousetrap"
+                class="form-control input-sm input_number mousetrap"
                 required
                 data-rule-abs_digit={{$check_decimal}}
                 data-msg-abs_digit="{{__('lang_v1.decimal_value_not_allowed')}}"

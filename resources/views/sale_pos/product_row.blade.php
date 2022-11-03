@@ -328,7 +328,7 @@
 				</button>
 			</span>
 			<input type="text" data-min="1"
-				   class="form-control pos_quantity input_number mousetrap input_quantity"
+				   class="form-control input_number mousetrap input_quantity"
 				   value="{{@format_quantity($product->quantity_ordered)}}" name="products[{{$row_count}}][quantity_2]" data-allow-overselling="@if(empty($pos_settings['allow_overselling'])){{'false'}}@else{{'true'}}@endif"
 				   @if($unit2_allow_decimal)
 					   data-decimal=1
